@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+curl http://www.nepalstock.com/todaysprice | grep -A 9 "td>[1-9]<" > stonk 
+curl http://www.nepalstock.com/todaysprice | grep -A 9 "td>[1-9][0-9]<" >> stonk 
+sed -i '/--/d' stonk 
+mv stonk stonk.html
+python3 scripts/parse.py | sed -r '/^\s*$/d' > raw
+s=2
+while [ $s -lt 202 ]
+do
+   sed "$s p" -n raw >> final
+   s=`expr $s + 10`   
+done
+
+x=3
+z=1
+while [ $x -lt 203 ]
+do
+	#str= sed "$x p" -n raw
+	sed -i -e "s/$/$(sed "$x p" -n raw)/" final
+	x=`expr $x + 10`
+	(( z++ ))
+done
+less raw
+rm final raw stonk.html
